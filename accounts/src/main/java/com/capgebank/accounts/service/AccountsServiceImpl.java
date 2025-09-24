@@ -68,11 +68,39 @@ public class AccountsServiceImpl implements IAccountsService {
     @Override
     public CustomerDto fetchAccount(String mobileNumber) {
         Customer customer = customerRepository.findByMobileNumber(mobileNumber).orElseThrow(
-                ()->new ResourceNotFoundException("Customer","mobileNumber",mobileNumber));
+                () -> new ResourceNotFoundException("Customer", "mobileNumber", mobileNumber));
         Account account = accountsRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(
-                ()->new ResourceNotFoundException("Account","customerId",customer.getCustomerId().toString()));
-        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer,new CustomerDto());
-        customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(account,new AccountsDto()));
+                () -> new ResourceNotFoundException("Account", "customerId", customer.getCustomerId().toString()));
+        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer, new CustomerDto());
+        customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(account, new AccountsDto()));
         return customerDto;
     }
+
+    /**
+     *
+     * @param customerDto - CustomerDto Object
+     * @return boolean indicating if the update of Account details is successful or not
+     */
+    @Override
+    public boolean updateAccount(CustomerDto customerDto) {
+        boolean isUpdated = false;
+        AccountsDto accountDto = customerDto.getAccountsDto();
+        if (accountDto != null) {
+            Account account = accountsRepository.findById(accountDto.getAccountNumber()).orElseThrow(
+                    () -> new ResourceNotFoundException("Account", "AccountNumber", accountDto.getAccountNumber().toString())
+            );
+            AccountsMapper.mapToAccount(accountDto, account);
+            account = accountsRepository.save(account);
+
+            Long customerId = account.getCustomerId();
+            Customer customer = customerRepository.findById(customerId).orElseThrow(
+                    () -> new ResourceNotFoundException("Customer", "CustomerId", customerId.toString())
+            );
+            CustomerMapper.mapToCustomer(customerDto, customer);
+            customerRepository.save(customer);
+            isUpdated = true;
+        }
+        return isUpdated;
+    }
+
 }
