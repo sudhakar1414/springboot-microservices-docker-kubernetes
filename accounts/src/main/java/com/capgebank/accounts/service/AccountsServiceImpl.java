@@ -1,8 +1,11 @@
 package com.capgebank.accounts.service;
 
 import com.capgebank.accounts.constants.AccountsConstants;
+import com.capgebank.accounts.dto.AccountsDto;
 import com.capgebank.accounts.dto.CustomerDto;
 import com.capgebank.accounts.exception.CustomerAlreadyExistsException;
+import com.capgebank.accounts.exception.ResourceNotFoundException;
+import com.capgebank.accounts.mapper.AccountsMapper;
 import com.capgebank.accounts.mapper.CustomerMapper;
 import com.capgebank.accounts.model.Account;
 import com.capgebank.accounts.model.Customer;
@@ -55,5 +58,21 @@ public class AccountsServiceImpl implements IAccountsService {
         newAccount.setCreatedAt(LocalDateTime.now());
         newAccount.setCreatedBy("Anonymous");
         return newAccount;
+    }
+
+    /**
+     *
+     * @param mobileNumber - Input Mobile Number
+     * @return Accounts Details based on a given mobileNumber
+     */
+    @Override
+    public CustomerDto fetchAccount(String mobileNumber) {
+        Customer customer = customerRepository.findByMobileNumber(mobileNumber).orElseThrow(
+                ()->new ResourceNotFoundException("Customer","mobileNumber",mobileNumber));
+        Account account = accountsRepository.findByCustomerId(customer.getCustomerId()).orElseThrow(
+                ()->new ResourceNotFoundException("Account","customerId",customer.getCustomerId().toString()));
+        CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer,new CustomerDto());
+        customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(account,new AccountsDto()));
+        return customerDto;
     }
 }

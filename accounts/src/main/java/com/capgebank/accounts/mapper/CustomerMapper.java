@@ -8,9 +8,9 @@ import com.capgebank.accounts.model.Customer;
 public class CustomerMapper {
 
     public static CustomerDto mapToCustomerDto(Customer customer, CustomerDto customerDto){
-        customerDto.setName(customerDto.getName());
-        customerDto.setEmail(customerDto.getEmail());
-        customerDto.setMobileNumber(customerDto.getMobileNumber());
+        customerDto.setName(customer.getName());
+        customerDto.setEmail(customer.getEmail());
+        customerDto.setMobileNumber(customer.getMobileNumber());
         return customerDto;
     }
 
